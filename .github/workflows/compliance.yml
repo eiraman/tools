@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2026 Paolo Ungari and contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Mandatory checks on every pull request (CONTRIBUTING §1, step 4): DCO sign-off and AI declaration,
+# REUSE licensing, secrets, local paths, e-mail addresses and the organisation deny-list.
+# A failing job is a Deny: it blocks the merge and is not waived by a reviewer.
+# Third-party actions are pinned to a full commit SHA; the comment gives the release it corresponds to.
+name: compliance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    name: DCO sign-off and AI declaration
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Every non-merge commit has a Signed-off-by line
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          fail=0
+          for c in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
+            if ! git log -1 --format=%B "$c" | grep -Eq '^Signed-off-by: [^<]+ <[^<>@ ]+@[^<> ]+>$'; then
+              echo "::error::commit $c has no valid Signed-off-by line (git commit --amend -s, or git rebase --signoff <base>)"
+              fail=1
+            fi
+          done
+          exit $fail
+      - name: Pull request declares AI use and an accountable human
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/body.txt"
+          if ! grep -Eiq '^AI-Use: *(none|review|partial|substantial) *$' "$RUNNER_TEMP/body.txt"; then
+            echo "::error::missing or invalid 'AI-Use:' line (none | review | partial | substantial), CONTRIBUTING §3"; exit 1
+          fi
+          if ! grep -Eiq '^Accountable-Human: *[^<]+<[^<>@ ]+@[^<> ]+> *$' "$RUNNER_TEMP/body.txt"; then
+            echo "::error::missing 'Accountable-Human: <name> <email>' line, CONTRIBUTING §3"; exit 1
+          fi
+          if ! grep -Eiq '^AI-Use: *none' "$RUNNER_TEMP/body.txt" && ! grep -Eiq '^Assisted-by: *[^<].*' "$RUNNER_TEMP/body.txt"; then
+            echo "::error::AI-Use is not 'none': add one 'Assisted-by:' line per tool, CONTRIBUTING §3"; exit 1
+          fi
+
+  reuse:
+    name: REUSE lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+
+  secrets:
+    name: Secrets, local paths and deny-list
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Secret scan (history of the pushed or proposed commits)
+        uses: trufflesecurity/trufflehog@ea68ca03c865c5f324e86e849ced20ed3cf9dbbb # v3.99.8
+        with:
+          version: 3.99.8
+          extra_args: --results=verified,unknown
+      - name: Local paths, e-mail addresses and organisation deny-list
+        env:
+          # Optional repository or organisation secret: one extended regular expression per line.
+          # It holds organisation-specific terms that must never be published and is not in the repository.
+          # Secrets are not passed to pull requests from forks; the maintainer re-runs the job before merging.
+          DENY_PATTERNS: ${{ secrets.EIRAMAN_DENY_PATTERNS }}
+        run: |
+          set -euo pipefail
+          fail=0
+          # Workflow files, the validator and its tests hold the patterns or test fixtures themselves and are
+          # excluded from the local-path check.
+          if git grep -nIE '/Users/|/home/[a-z][a-z0-9_-]*/|[A-Za-z]:\\Users\\|OneDrive' -- . ':(exclude).github/workflows/' \
+               ':(exclude)valida_profilo.py' ':(exclude)tests/'; then
+            echo "::error::local paths found (see lines above)"; fail=1
+          fi
+          if git grep -nIoE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' -- . ':(exclude).github/workflows/' \
+               | grep -vE '@(example\.(org|com|net)|users\.noreply\.github\.com|PLACEHOLDER)'; then
+            echo "::error::e-mail addresses other than placeholders found (see lines above)"; fail=1
+          fi
+          if [ -n "${DENY_PATTERNS:-}" ]; then
+            printf '%s\n' "$DENY_PATTERNS" | grep -v '^#' | grep -v '^$' > "$RUNNER_TEMP/deny.txt" || true
+            # Print file names only, never the matched terms.
+            if [ -s "$RUNNER_TEMP/deny.txt" ] && git grep -lIiE -f "$RUNNER_TEMP/deny.txt" -- .; then
+              echo "::error::deny-list terms found in the files listed above"; fail=1
+            fi
+            rm -f "$RUNNER_TEMP/deny.txt"
+          else
+            echo "::warning::EIRAMAN_DENY_PATTERNS is not set: only generic patterns were checked"
+          fi
+          exit $fail

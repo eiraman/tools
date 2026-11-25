@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Paolo Ungari and contributors
+# SPDX-License-Identifier: Apache-2.0
+# REUSE Specification 3.3. Code files carry SPDX headers; files without one are declared here.
+version = 1
+
+[[annotations]]
+path = ["README.md", ".gitignore", "tests/baseline_registro.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Paolo Ungari and contributors"
+SPDX-License-Identifier = "Apache-2.0"

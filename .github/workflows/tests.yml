@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Paolo Ungari and contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Runs the unit tests of the tools on every pull request and on main. The registry tests read a checkout
+# of role-profiles at PROFILES_REF, a full commit SHA (never a branch), so that the 40-profile baseline
+# is compared against a fixed registry. Updating PROFILES_REF is a reviewed change to this file.
+# Third-party actions are pinned to a full commit SHA; the comment gives the release it corresponds to.
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PROFILES_REPO: eiraman/role-profiles
+  PROFILES_REF: "c9af3d847346fc7443a3393a751c9470c70da1f7"
+
+jobs:
+  unittest:
+    name: Unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: tools
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.PROFILES_REPO }}
+          ref: ${{ env.PROFILES_REF }}
+          path: role-profiles
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Run the tests
+        working-directory: tools/tests
+        env:
+          EIRAMAN_REGISTRY: ${{ github.workspace }}/role-profiles
+        run: python3 -B -m unittest -v

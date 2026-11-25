@@ -1,0 +1,3 @@
+.eiraman-deny.local
+__pycache__/
+*.pyc
