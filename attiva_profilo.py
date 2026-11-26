@@ -7,10 +7,15 @@ Scrive la sezione 10 (catalogo) di PROFILO.md:
     python3 attiva_profilo.py --scrivi-catalogo <cartella> [<cartella> ...]
 Produce il file di attivazione di un profilo a un livello:
     python3 attiva_profilo.py <cartella> <SD1..SD5> --strumento claude|codex|copilot [--out <cartella>]
-Senza --out stampa il contenuto. La mappa livello -> configurazione è _seniority/seniority.json."""
+Senza --out stampa il contenuto. La mappa livello -> configurazione è _seniority/seniority.json.
+
+Ripiego dei task fuori catalogo. Il campo `fallback` della mappa è il livello di ripiego. Se la mappa dichiara
+anche `fallback_indicativo: true`, il livello è un valore indicativo e lo fissa il mandato del progetto; se
+dichiara `fallback_eccezione` ({"livello": "SDn", "compiti": "..."}), i task fuori catalogo di quel tipo partono
+dal livello dell'eccezione. Senza questi due campi il testo generato è quello delle versioni precedenti."""
 import json, os, re, sys
 
-__version__ = "0.2.3"
+__version__ = "0.3.0"
 if __name__ == "__main__" and sys.argv[1:] == ["--version"]:  # before the Seniority map is read
     print(f"attiva_profilo.py {__version__}"); sys.exit(0)
 
@@ -35,11 +40,26 @@ def tabella(p):
         c = cfg(t["seniority"])
         righe.append(f"| {cell(t['id'])} | {cell(t['task'])} | {cell(t.get('deliverable'))} | {t['seniority']} {LIV[t['seniority']]['nome']} | {c[0]} | {c[1]} | {c[2]} |")
     fb = SEN["fallback"]; c = cfg(fb)
-    righe.append(f"| — | Qualsiasi task fuori catalogo | — | {fb} {LIV[fb]['nome']} (ripiego) | {c[0]} | {c[1]} | {c[2]} |")
+    ind, ecc = SEN.get("fallback_indicativo") is True, SEN.get("fallback_eccezione")
+    if not ind and not ecc:  # mappa senza i campi nuovi: testo delle versioni precedenti
+        righe.append(f"| — | Qualsiasi task fuori catalogo | — | {fb} {LIV[fb]['nome']} (ripiego) | {c[0]} | {c[1]} | {c[2]} |")
+        frase = f"Un task fuori catalogo si esegue a **{fb}**. "
+    else:
+        nota = "ripiego indicativo, lo fissa il mandato" if ind else "ripiego"
+        frase = (f"Un task fuori catalogo si esegue al livello di ripiego fissato nel mandato (valore indicativo **{fb}**)"
+                 if ind else f"Un task fuori catalogo si esegue a **{fb}**")
+        if ecc:
+            fe = ecc["livello"]; ce = cfg(fe); comp = cell(ecc["compiti"])
+            righe.append(f"| — | Task fuori catalogo, salvo l'eccezione della riga seguente | — | {fb} {LIV[fb]['nome']} ({nota}) | {c[0]} | {c[1]} | {c[2]} |")
+            righe.append(f"| — | Task fuori catalogo che per natura è di livello {LIV[fe]['nome']}: {comp} | — | {fe} {LIV[fe]['nome']} (ripiego, eccezione) | {ce[0]} | {ce[1]} | {ce[2]} |")
+            frase += f"; i task fuori catalogo che per natura sono di livello {LIV[fe]['nome']} ({comp}) partono da **{fe}**"
+        else:
+            righe.append(f"| — | Qualsiasi task fuori catalogo | — | {fb} {LIV[fb]['nome']} ({nota}) | {c[0]} | {c[1]} | {c[2]} |")
+        frase += ". "
     s = p.get("seniority", {})
     testa = (f"Livello tipico del ruolo: da **{s.get('minima','?')}** a **{s.get('massima','?')}**. "
              f"Il Coordinatore AI attiva l'agente con la configurazione della riga; nella squadra l'agente lavora al livello più alto "
-             f"tra quelli dei suoi task nel Work Package. Un task fuori catalogo si esegue a **{fb}**. "
+             f"tra quelli dei suoi task nel Work Package. {frase}"
              f"Configurazioni dalla mappa `_seniority/seniority.json` (versione {SEN['versione']}), da riverificare a ogni cambio di modello.")
     return testa + "\n\n" + "\n".join(righe)
 

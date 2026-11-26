@@ -191,5 +191,51 @@ class RegistryTests(unittest.TestCase):
         self.assertIn("stato mancante", out)
 
 
+@unittest.skipUnless(HAS_REGISTRY, f"registry not found at {REGISTRY}")
+class FallbackTests(unittest.TestCase):
+    """The generated catalogue follows the fallback fields of the Digital Seniority map."""
+
+    def setUp(self):
+        self.sb = Sandbox()
+        os.unlink(os.path.join(self.sb.reg, "_seniority"))
+        shutil.copytree(os.path.join(REGISTRY, "_seniority"), os.path.join(self.sb.reg, "_seniority"))
+        self.map = os.path.join(self.sb.reg, "_seniority", "seniority.json")
+        self.dst = self.sb.copy_profile(baseline_dirs()[0])
+
+    def tearDown(self):
+        self.sb.close()
+
+    def generate(self, **fields):
+        m = json.loads(read(self.map))
+        for k in ("fallback_indicativo", "fallback_eccezione"): m.pop(k, None)
+        m.update(fields)
+        write(self.map, json.dumps(m, ensure_ascii=False))
+        r = subprocess.run([sys.executable, os.path.join(self.sb.reg, "_strumenti", "attiva_profilo.py"),
+                            "--scrivi-catalogo", self.dst], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        sec = read(os.path.join(self.dst, "PROFILO.md")).split("<!-- catalogo:inizio -->")[1]
+        self.assertEqual(self.sb.run([self.dst])[0], 0)
+        return sec
+
+    def test_map_without_new_fields_keeps_the_previous_text(self):
+        sec = self.generate(fallback="SD4")
+        self.assertIn("Un task fuori catalogo si esegue a **SD4**. Configurazioni dalla mappa", sec)
+        self.assertIn("| — | Qualsiasi task fuori catalogo | — | SD4 Lead (ripiego) |", sec)
+        self.assertEqual(sec.count("fuori catalogo"), 2)
+
+    def test_indicative_fallback_with_exception(self):
+        sec = self.generate(fallback="SD3", fallback_indicativo=True,
+                            fallback_eccezione={"livello": "SD4", "compiti": "architettura, sicurezza"})
+        self.assertIn("al livello di ripiego fissato nel mandato (valore indicativo **SD3**); i task fuori catalogo "
+                      "che per natura sono di livello Lead (architettura, sicurezza) partono da **SD4**. ", sec)
+        self.assertIn("| SD3 Senior (ripiego indicativo, lo fissa il mandato) |", sec)
+        self.assertIn("| SD4 Lead (ripiego, eccezione) |", sec)
+
+    def test_indicative_fallback_without_exception(self):
+        sec = self.generate(fallback="SD3", fallback_indicativo=True)
+        self.assertIn("(valore indicativo **SD3**). Configurazioni", sec)
+        self.assertIn("| — | Qualsiasi task fuori catalogo | — | SD3 Senior (ripiego indicativo, lo fissa il mandato) |", sec)
+
+
 if __name__ == "__main__":
     unittest.main()

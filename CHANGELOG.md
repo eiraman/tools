@@ -13,6 +13,38 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
+Scope: Change Request CR-010 of the method project (Wave CONS-01), which carries out the tools part of CR-009
+after Guide 1.0.0-rc.3 (RFC 0003, item 10; decision D4 of the Human Manager on the fallback level). Version
+bump: MINOR, the generator reads two new optional fields of the Digital Seniority map; nothing changes for a
+map without them.
+
+### Added
+
+- `attiva_profilo.py`, generated catalogue (section 10 of `PROFILO.md`): two optional fields of
+  `_seniority/seniority.json`.
+  - `fallback_indicativo: true`: the fallback level is an indicative value that the mandate of the project
+    sets. The sentence and the row of the table say so.
+  - `fallback_eccezione: {"livello": "SDn", "compiti": "..."}`: tasks outside the catalogue of the named kinds
+    start at the level of the exception. The table gains a second fallback row and the sentence names the
+    exception.
+- Tests: three cases on the generated catalogue (map without the new fields, indicative fallback with the
+  exception, indicative fallback alone). 31 tests.
+
+### Unchanged
+
+- With a map that has neither field, the generated text is byte for byte the one of 0.2.3, so the registry
+  releases up to role-profiles 0.5.1 validate as before. The registry tests still pin role-profiles v0.4.1
+  and its 47-profile baseline; they follow the next registry release in a later PATCH.
+- `valida_profilo.py` and `release_diff.py` change only their version number.
+
+### Known limits
+
+- The generated sentence does not say that a task outside the catalogue is promoted at the first failure for
+  lack of capability (Guide §7.1, "Promotion and reduction"): that rule is in the AI Coordinator profile and
+  in the explanation of the map, not in the generated catalogue.
+
 ## [0.2.3] - 2026-11-26
 
 Scope: Change Requests CR-004, CR-005 and CR-006 of the method project (Wave REL-07).
@@ -91,7 +123,8 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.3...main
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.3.0...main
+[0.3.0]: https://github.com/eiraman/tools/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/eiraman/tools/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/eiraman/tools/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/eiraman/tools/compare/v0.2.0...v0.2.1
