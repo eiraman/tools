@@ -50,6 +50,6 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/558ddb21136ff7f2ef1c67a7574398f11465be25...main
-[0.2.0]: https://github.com/eiraman/tools/compare/558ddb21136ff7f2ef1c67a7574398f11465be25...main
-[0.1.0]: https://github.com/eiraman/tools/tree/558ddb21136ff7f2ef1c67a7574398f11465be25
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.0...main
+[0.2.0]: https://github.com/eiraman/tools/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/eiraman/tools/releases/tag/v0.1.0
