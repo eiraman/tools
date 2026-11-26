@@ -16,7 +16,7 @@ dal livello dell'eccezione, che è indicativo anch'esso quando lo è il ripiego.
 essere più alto del ripiego. Senza questi due campi il testo generato è quello delle versioni precedenti."""
 import json, os, re, sys
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 if __name__ == "__main__" and sys.argv[1:] == ["--version"]:  # before the Seniority map is read
     print(f"attiva_profilo.py {__version__}"); sys.exit(0)
 

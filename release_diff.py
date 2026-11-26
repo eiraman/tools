@@ -21,7 +21,7 @@ The report is not a gate: when it is produced the exit code is 0, whatever it co
 code is 2 only when no report can be produced (not a Git repository, unknown ref)."""
 import argparse, difflib, json, re, subprocess, sys
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 KEYWORDS = [("MUST NOT", r"\bMUST\s+NOT\b"), ("MUST", r"\bMUST\b(?!\s+NOT\b)"),
             ("SHOULD NOT", r"\bSHOULD\s+NOT\b"), ("SHOULD", r"\bSHOULD\b(?!\s+NOT\b)"), ("MAY", r"\bMAY\b")]

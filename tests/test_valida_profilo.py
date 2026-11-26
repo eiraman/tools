@@ -110,7 +110,7 @@ class RegistryTests(unittest.TestCase):
 
     def test_all_profiles_match_baseline(self):
         dirs = baseline_dirs()
-        self.assertEqual(len(dirs), 47)
+        self.assertEqual(len(dirs), 48)
         code, out = self.sb.run(dirs, deny_file=os.environ.get("EIRAMAN_DENY_FILE"), cwd=REGISTRY)
         self.assertEqual(code, 0, out)
         self.assertEqual(out, read(BASELINE))

@@ -9,7 +9,7 @@ corrente, risalendo dalla cartella dello strumento fino alla radice del reposito
 dalla variabile EIRAMAN_DENY_FILE. Se manca, restano attivi i soli pattern generici."""
 import json, os, re, sys
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 SEZIONI = ["Identità e scopo", "Competenze di base e metodologie", "Responsabilità", "Azioni consentite",
            "Azioni vietate", "Regole di comunicazione", "Repository documentale", "Limiti dichiarati",

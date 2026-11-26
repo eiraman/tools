@@ -13,6 +13,22 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-26
+
+Scope: Change Request CR-010 of the method project (Wave CONS-01). Version bump: PATCH, tests and CI only; no
+tool changes its behaviour.
+
+### Changed
+
+- The registry tests follow role-profiles 0.6.0: `tests/baseline_registro.txt` lists the 48 standard profiles
+  of that release, the 47 of 0.4.1 plus `analisi-funzionale/scrum-master-ai` (registry 0.5.0), and the test
+  expects 48. The templates in `_modello/` stay outside the baseline. Registry 0.6.0 uses the fallback fields
+  of the Digital Seniority map that tools 0.3.0 introduced.
+- CI: `PROFILES_REF` in `tests.yml` pins role-profiles 0.6.0
+  (`8eb5fa852faeac6ea91219b85beb30b4f512c31b`, a local candidate, not yet tagged). **Order of publication:**
+  role-profiles 0.6.0 must be published before this release, and tools 0.3.0 before role-profiles 0.6.0.
+- `attiva_profilo.py`, `valida_profilo.py` and `release_diff.py` change only their version number.
+
 ## [0.3.0] - 2026-11-26
 
 Scope: Change Request CR-010 of the method project (Wave CONS-01), which carries out the tools part of CR-009
@@ -127,7 +143,8 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/v0.3.0...main
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.3.1...main
+[0.3.1]: https://github.com/eiraman/tools/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/eiraman/tools/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/eiraman/tools/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/eiraman/tools/compare/v0.2.1...v0.2.2

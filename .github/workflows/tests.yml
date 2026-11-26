@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Runs the unit tests of the tools on every pull request and on main. The registry tests read a checkout
-# of role-profiles at PROFILES_REF, a full commit SHA (never a branch), so that the 47-profile baseline
+# of role-profiles at PROFILES_REF, a full commit SHA (never a branch), so that the 48-profile baseline
 # is compared against a fixed registry. Updating PROFILES_REF is a reviewed change to this file.
 # Third-party actions are pinned to a full commit SHA; the comment gives the release it corresponds to.
 name: tests
@@ -17,7 +17,7 @@ permissions:
 
 env:
   PROFILES_REPO: eiraman/role-profiles
-  PROFILES_REF: "a49e54b579025bff9afbe32b90c6a75771d4c6ee" # role-profiles v0.4.1
+  PROFILES_REF: "8eb5fa852faeac6ea91219b85beb30b4f512c31b" # role-profiles 0.6.0
 
 jobs:
   unittest:

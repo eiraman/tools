@@ -1,5 +1,6 @@
 OK   ./analisi-funzionale/analista-funzionale
 OK   ./analisi-funzionale/facilitatore-design-thinking
+OK   ./analisi-funzionale/scrum-master-ai
 OK   ./analisi-funzionale/technical-writer
 OK   ./analisi-funzionale/tester-funzionale
 OK   ./analisi-funzionale/utente-simulato
