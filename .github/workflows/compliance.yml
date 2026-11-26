@@ -88,8 +88,11 @@ jobs:
           fail=0
           # Workflow files, the validator and its tests hold the patterns or test fixtures themselves and are
           # excluded from the local-path check.
-          if git grep -nIE '/Users/|/home/[a-z][a-z0-9_-]*/|[A-Za-z]:\\Users\\|OneDrive' -- . ':(exclude).github/workflows/' \
-               ':(exclude)valida_profilo.py' ':(exclude)tests/'; then
+          # http(s) URLs are removed before matching, so a path segment such as /home/ inside a URL is not flagged.
+          LOCAL_PATHS='/Users/|/home/[a-z][a-z0-9_-]*/|[A-Za-z]:\\Users\\|OneDrive'
+          if git grep -nIE "$LOCAL_PATHS" -- . ':(exclude).github/workflows/' \
+               ':(exclude)valida_profilo.py' ':(exclude)tests/' \
+             | sed -E 's#https?://[^[:space:]"'"'"'`<>)]*##g' | grep -E "$LOCAL_PATHS"; then
             echo "::error::local paths found (see lines above)"; fail=1
           fi
           if git grep -nIoE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' -- . ':(exclude).github/workflows/' \

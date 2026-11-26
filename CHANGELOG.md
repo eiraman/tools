@@ -13,6 +13,26 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-26
+
+Scope: Change Requests CR-004, CR-005 and CR-006 of the method project (Wave REL-07).
+
+### Changed
+
+- The registry tests follow role-profiles 0.4.1: `tests/baseline_registro.txt` lists the 47 standard
+  profiles of that release, the 43 of 0.3.0 plus `governo/revisore-architettura-applicativa-dati`,
+  `governo/revisore-architettura-cloud`, `governo/revisore-legale-compliance` and
+  `governo/revisore-test-qualita`, and the test expects 47. The templates in `_modello/` stay outside the
+  baseline.
+- CI: `PROFILES_REF` in `tests.yml` pins role-profiles v0.4.1
+  (`a49e54b579025bff9afbe32b90c6a75771d4c6ee`).
+
+### Fixed
+
+- CI, `compliance.yml`: the local-path check removes http(s) URLs from the matched lines and matches
+  again, so a path segment inside a URL is no longer flagged. The block is the one of `role-profiles`
+  v0.4.1, keeping this repository's exclusions of `valida_profilo.py` and `tests/` (CR-005, CR-006).
+
 ## [0.2.2] - 2026-11-26
 
 ### Changed
@@ -71,7 +91,8 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.2...main
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.3...main
+[0.2.3]: https://github.com/eiraman/tools/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/eiraman/tools/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/eiraman/tools/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/eiraman/tools/compare/v0.1.0...v0.2.0
