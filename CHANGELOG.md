@@ -13,6 +13,8 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
 ### Added
 
 - `release_diff.py`: report of the differences between two Git refs for the independent scope review of a
@@ -26,7 +28,7 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 First public release, published as commit `558ddb2` of `github.com/eiraman/tools` during the restricted
 launch of 25 November 2026. It was not tagged; the version number was assigned afterwards
-(VERSIONING.md). The role-profiles CI pins this commit as `TOOLS_REF`.
+(VERSIONING.md). The tag `v0.1.0` will be applied retroactively to that commit. The role-profiles CI pins this commit as `TOOLS_REF`.
 
 ### Added
 
@@ -49,4 +51,5 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
   that licence.
 
 [Unreleased]: https://github.com/eiraman/tools/compare/558ddb21136ff7f2ef1c67a7574398f11465be25...main
+[0.2.0]: https://github.com/eiraman/tools/compare/558ddb21136ff7f2ef1c67a7574398f11465be25...main
 [0.1.0]: https://github.com/eiraman/tools/tree/558ddb21136ff7f2ef1c67a7574398f11465be25

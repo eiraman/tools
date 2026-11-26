@@ -10,7 +10,7 @@ Produce il file di attivazione di un profilo a un livello:
 Senza --out stampa il contenuto. La mappa livello -> configurazione è _seniority/seniority.json."""
 import json, os, re, sys
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 if __name__ == "__main__" and sys.argv[1:] == ["--version"]:  # before the Seniority map is read
     print(f"attiva_profilo.py {__version__}"); sys.exit(0)
 
