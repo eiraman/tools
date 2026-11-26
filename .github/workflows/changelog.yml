@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 Paolo Ungari and contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Changelog check (community/RELEASING.md, step 3): a pull request must change CHANGELOG.md, normally by
+# adding an entry under [Unreleased]. A maintainer may add the label `no-changelog` to a pull request that
+# changes nothing a release would report (for example CI-only or typo fixes); the label is visible in review.
+# Third-party actions are pinned to a full commit SHA; the comment gives the release it corresponds to.
+name: changelog
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    name: CHANGELOG.md updated
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Skipped by the no-changelog label
+        if: contains(github.event.pull_request.labels.*.name, 'no-changelog')
+        run: echo "Label no-changelog present, changelog check skipped."
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: The pull request changes CHANGELOG.md
+        if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -qx 'CHANGELOG.md'; then
+            echo "CHANGELOG.md is changed."
+          else
+            echo "::error::CHANGELOG.md is not changed. Add an entry under [Unreleased], or ask a maintainer for the label no-changelog."
+            exit 1
+          fi

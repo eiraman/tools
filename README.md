@@ -5,6 +5,9 @@ Command-line tools for Eiraman Role Profiles. Python 3, standard library only.
 
 - `valida_profilo.py` checks a Role Profile folder: the two files (`PROFILO.md`, `profilo.json`), required sections and fields, the status, the qualification suite, the task catalogue, and forbidden content.
 - `attiva_profilo.py` writes section 10 (task catalogue) of `PROFILO.md` and produces the activation file of a profile at a Digital Seniority level.
+- `release_diff.py` reports the differences between two Git refs of any repository, for the independent scope review of a release ([community/RELEASING.md](https://github.com/eiraman/community/blob/main/RELEASING.md)).
+
+All tools share one version (`__version__`, printed by `--version`); changes are in [CHANGELOG.md](CHANGELOG.md).
 
 ## Layout
 
@@ -19,6 +22,30 @@ python3 _strumenti/attiva_profilo.py <profile-folder> SD3 --strumento claude --o
 ```
 
 Accepted statuses: `draft`, `qualified`, `maintained`, `suspended`, and the Italian `bozza non qualificata`, `qualificato`. The status is read only from the profile's status line (`Stato: …` or `Status: …`) and from the `stato` field of `profilo.json`. Section names are in Italian.
+
+## Release diff
+
+```sh
+python3 release_diff.py <repo> <old-ref> <new-ref> [--json] [--max-lines N]
+python3 release_diff.py ../guide v1.0.0-rc.1 HEAD          # text report
+python3 release_diff.py ../guide v1.0.0-rc.1 HEAD --json   # the same report as JSON
+```
+
+`release_diff.py` does not need the registry layout: it reads any Git repository. Between `<old-ref>` (the
+previous release tag) and `<new-ref>` (the release candidate) it reports:
+
+| Section | Content |
+|---|---|
+| Files added, removed, renamed | Renames and copies as Git detects them (`-M`), with the similarity |
+| Files modified | Lines added and removed per modified file (`binary` for binary files) |
+| Markdown headings removed or renamed | ATX headings outside fenced code; a heading replaced in place by another is reported as renamed; headings of deleted Markdown files are removed |
+| RFC 2119 key words | For each changed Markdown file, the counts of MUST, MUST NOT, SHOULD, SHOULD NOT and MAY (capitals only) before and after, marked `CHANGED` when they differ |
+| JSON keys removed | For each changed `.json` file, such as `profilo.json`, the key paths that disappear; list items are folded into `[]`, for example `catalogo[].note` |
+| Removed non-blank lines | Every removed line as `old-path:line: text`, capped by `--max-lines` (default 200); the total is always given |
+
+The report is information for the reviewer, not a gate: whenever it is produced the exit code is 0, even
+if it lists removals. The exit code is 2 only when no report can be produced (not a Git repository, unknown
+ref). The scope reviewer maps every item to a changelog entry or an approved decision (RELEASING.md, step 5).
 
 ## Forbidden terms
 
@@ -38,7 +65,7 @@ If none exists, only the generic patterns apply.
 cd tests && python3 -m unittest -v
 ```
 
-The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 40 published profiles.
+`test_release_diff.py` builds throwaway Git repositories and needs `git`; `test_versions.py` checks that the tools share one version, equal to the latest release in `CHANGELOG.md`. The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 40 published profiles.
 
 ## Licence
 

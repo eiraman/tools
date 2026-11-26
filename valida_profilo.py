@@ -9,6 +9,8 @@ corrente, risalendo dalla cartella dello strumento fino alla radice del reposito
 dalla variabile EIRAMAN_DENY_FILE. Se manca, restano attivi i soli pattern generici."""
 import json, os, re, sys
 
+__version__ = "0.1.0"
+
 SEZIONI = ["Identità e scopo", "Competenze di base e metodologie", "Responsabilità", "Azioni consentite",
            "Azioni vietate", "Regole di comunicazione", "Repository documentale", "Limiti dichiarati",
            "Suite di qualificazione", "Catalogo dei task e Seniority Digitale"]
@@ -122,6 +124,8 @@ def check(d):
     return err
 
 def main():
+    if sys.argv[1:] == ["--version"]:
+        print(f"valida_profilo.py {__version__}"); sys.exit(0)
     bad = 0
     for d in sys.argv[1:] or ["."]:
         e = check(d)
