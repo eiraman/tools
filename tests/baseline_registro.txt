@@ -26,6 +26,7 @@ OK   ./finops/finops-for-ai
 OK   ./finops/finops-forecast-budget
 OK   ./finops/finops-practitioner
 OK   ./finops/finops-rate-optimization
+OK   ./governo/revisore-ai
 OK   ./sviluppo/dotnet-developer
 OK   ./sviluppo/go-developer
 OK   ./sviluppo/java-developer
