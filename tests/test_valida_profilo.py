@@ -225,6 +225,10 @@ class FallbackTests(unittest.TestCase):
         self.assertIn("Un task fuori catalogo si esegue a **SD4**. Configurazioni dalla mappa", sec)
         self.assertIn("| — | Qualsiasi task fuori catalogo | — | SD4 Lead (ripiego) |", sec)
         self.assertEqual(sec.count("fuori catalogo"), 2)
+        self.assertNotIn("eccezione", sec)
+        self.assertNotIn("indicativo", sec)
+        self.assertTrue(sec.rstrip().endswith("| — | Qualsiasi task fuori catalogo | — | SD4 Lead (ripiego) | `opus` · `high` | "
+                                              "`gpt-6.2-astra` · `high` | Claude Opus 5.5 |\n<!-- catalogo:fine -->"), sec[-300:])
 
     def test_indicative_fallback_with_exception(self):
         sec = self.generate(fallback="SD3", fallback_indicativo=True,
@@ -251,8 +255,12 @@ class FallbackTests(unittest.TestCase):
                     {"fallback_eccezione": {"livello": "SD9", "compiti": "x"}},
                     {"fallback_eccezione": {"livello": "SD2", "compiti": "x"}},
                     {"fallback_eccezione": "SD4"},
-                    {"fallback_indicativo": "si"}):
-            r = self.run_generator(fallback="SD3", **bad)
+                    {"fallback_eccezione": {"livello": "SD4", "compiti": ["a", "b"]}},
+                    {"fallback_indicativo": "si"},
+                    {"fallback_indicativo": 1},
+                    {"fallback_indicativo": 0},
+                    {"fallback": "SD9"}):
+            r = self.run_generator(**{"fallback": "SD3", **bad})
             self.assertNotEqual(r.returncode, 0, bad)
             self.assertIn("seniority.json:", r.stderr, bad)
             self.assertEqual(read(os.path.join(self.dst, "PROFILO.md")), before, bad)
@@ -260,6 +268,7 @@ class FallbackTests(unittest.TestCase):
     def test_indicative_fallback_without_exception(self):
         sec = self.generate(fallback="SD3", fallback_indicativo=True)
         self.assertIn("(valore indicativo **SD3**). Configurazioni", sec)
+        self.assertNotIn("eccezione", sec)
         self.assertIn("| — | Qualsiasi task fuori catalogo | — | SD3 Senior (ripiego indicativo, lo fissa il mandato) |", sec)
 
 

@@ -13,6 +13,30 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-26
+
+Scope: Change Request CR-010 of the method project. Corrections from the independent re-review of 0.3.0 and
+0.3.1 (REV-CONS-C). Version bump: PATCH, fixes that restore the behaviour the entry 0.3.0 declared.
+
+### Fixed
+
+- `attiva_profilo.py`: `fallback_indicativo` given as `1` or `0` was accepted and read as "not indicative",
+  although the entry 0.3.0 said that a value that is not true or false is refused; it is now refused. Also
+  refused, with a message that names the field: `compiti` of `fallback_eccezione` that is not a text, and a
+  `fallback` that is not a level of the map (it ended in an unexplained error).
+- Tests: the invalid values above are covered; the cases without the exception check that no exception row is
+  written, and the case of a map without the new fields checks the last row of the table against a fixed text.
+- `README.md`: the baseline holds the 48 standard profiles of the pinned registry (it said 40).
+
+### Notes on 0.3.0, recorded here
+
+- The generated catalogue does not carry the mark `"provata": false` of the configurations not yet tested
+  (Guide §7.1, "Catalogue"): the mark is in the map and in its explanation only.
+- RFC 0003, "Impact", names three changes under Tools. The role label in the run records and the Manager View
+  (governance share, progress with its denominator) are carried out in the registry, in `controllore/`
+  (role-profiles 0.6.0), where the Manager View generator lives; no tool of this repository reads run
+  records. The traceability check is not in this repository: the point stays open for the guide repository.
+
 ## [0.3.1] - 2026-11-26
 
 Scope: Change Request CR-010 of the method project (Wave CONS-01). Version bump: PATCH, tests and CI only; no
@@ -143,7 +167,8 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/v0.3.1...main
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.3.2...main
+[0.3.2]: https://github.com/eiraman/tools/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/eiraman/tools/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/eiraman/tools/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/eiraman/tools/compare/v0.2.2...v0.2.3

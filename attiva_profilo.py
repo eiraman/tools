@@ -16,7 +16,7 @@ dal livello dell'eccezione, che è indicativo anch'esso quando lo è il ripiego.
 essere più alto del ripiego. Senza questi due campi il testo generato è quello delle versioni precedenti."""
 import json, os, re, sys
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 if __name__ == "__main__" and sys.argv[1:] == ["--version"]:  # before the Seniority map is read
     print(f"attiva_profilo.py {__version__}"); sys.exit(0)
 
@@ -43,13 +43,17 @@ def tabella(p):
     for t in p["catalogo"]:
         c = cfg(t["seniority"])
         righe.append(f"| {cell(t['id'])} | {cell(t['task'])} | {cell(t.get('deliverable'))} | {t['seniority']} {LIV[t['seniority']]['nome']} | {c[0]} | {c[1]} | {c[2]} |")
-    fb = SEN["fallback"]; c = cfg(fb)
+    fb = SEN.get("fallback")
+    if fb not in LIV:
+        raise MappaNonValida("seniority.json: `fallback` deve essere un livello della mappa")
+    c = cfg(fb)
     ind, ecc = SEN.get("fallback_indicativo"), SEN.get("fallback_eccezione")
-    if ind not in (None, True, False):
+    if ind is not None and type(ind) is not bool:
         raise MappaNonValida("seniority.json: `fallback_indicativo` deve essere true o false")
     ind = ind is True
     if ecc is not None:
-        if not isinstance(ecc, dict) or ecc.get("livello") not in LIV or not str(ecc.get("compiti") or "").strip():
+        if (not isinstance(ecc, dict) or ecc.get("livello") not in LIV
+                or not isinstance(ecc.get("compiti"), str) or not ecc["compiti"].strip()):
             raise MappaNonValida("seniority.json: `fallback_eccezione` richiede `livello` (un livello della mappa) e `compiti` (testo)")
         ids = [l["id"] for l in SEN["livelli"]]
         if ids.index(ecc["livello"]) <= ids.index(fb):

@@ -71,7 +71,7 @@ If none exists, only the generic patterns apply.
 cd tests && python3 -m unittest -v
 ```
 
-`test_release_diff.py` builds throwaway Git repositories and needs `git`; `test_versions.py` checks that the tools share one version, equal to the latest release in `CHANGELOG.md`. The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 40 published profiles.
+`test_release_diff.py` builds throwaway Git repositories and needs `git`; `test_versions.py` checks that the tools share one version, equal to the latest release in `CHANGELOG.md`. The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 48 standard profiles of the pinned registry.
 
 ## Licence
 
