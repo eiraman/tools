@@ -23,7 +23,7 @@ Scope: Change Request CR-010 of the method project. Corrections from the indepen
 - `attiva_profilo.py`: `fallback_indicativo` given as `1` or `0` was accepted and read as "not indicative",
   although the entry 0.3.0 said that a value that is not true or false is refused; it is now refused. Also
   refused, with a message that names the field: `compiti` of `fallback_eccezione` that is not a text, and a
-  `fallback` that is not a level of the map (it ended in an unexplained error).
+  `fallback` or a `livello` that is not the name of a level of the map (they ended in an unexplained error).
 - Tests: the invalid values above are covered; the cases without the exception check that no exception row is
   written, and the case of a map without the new fields checks the last row of the table against a fixed text.
 - `README.md`: the baseline holds the 48 standard profiles of the pinned registry (it said 40).
@@ -35,7 +35,10 @@ Scope: Change Request CR-010 of the method project. Corrections from the indepen
 - RFC 0003, "Impact", names three changes under Tools. The role label in the run records and the Manager View
   (governance share, progress with its denominator) are carried out in the registry, in `controllore/`
   (role-profiles 0.6.0), where the Manager View generator lives; no tool of this repository reads run
-  records. The traceability check is not in this repository: the point stays open for the guide repository.
+  records. The rows of RFC 0003 and the count of eleven transpositions are in `TRACEABILITY.md` of the Guide
+  1.0.0-rc.3; no tool of this repository, or of the guide repository, checks that table.
+- Not changed by this release: after generating, the fallback tests run the validator on the same profile,
+  which compares section 10 with the same generator; that check cannot fail and proves nothing by itself.
 
 ## [0.3.1] - 2026-11-26
 

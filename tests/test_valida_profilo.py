@@ -259,7 +259,9 @@ class FallbackTests(unittest.TestCase):
                     {"fallback_indicativo": "si"},
                     {"fallback_indicativo": 1},
                     {"fallback_indicativo": 0},
-                    {"fallback": "SD9"}):
+                    {"fallback": "SD9"},
+                    {"fallback": ["SD3"]},
+                    {"fallback_eccezione": {"livello": ["SD4"], "compiti": "x"}}):
             r = self.run_generator(**{"fallback": "SD3", **bad})
             self.assertNotEqual(r.returncode, 0, bad)
             self.assertIn("seniority.json:", r.stderr, bad)

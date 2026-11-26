@@ -44,7 +44,7 @@ def tabella(p):
         c = cfg(t["seniority"])
         righe.append(f"| {cell(t['id'])} | {cell(t['task'])} | {cell(t.get('deliverable'))} | {t['seniority']} {LIV[t['seniority']]['nome']} | {c[0]} | {c[1]} | {c[2]} |")
     fb = SEN.get("fallback")
-    if fb not in LIV:
+    if not isinstance(fb, str) or fb not in LIV:
         raise MappaNonValida("seniority.json: `fallback` deve essere un livello della mappa")
     c = cfg(fb)
     ind, ecc = SEN.get("fallback_indicativo"), SEN.get("fallback_eccezione")
@@ -52,7 +52,7 @@ def tabella(p):
         raise MappaNonValida("seniority.json: `fallback_indicativo` deve essere true o false")
     ind = ind is True
     if ecc is not None:
-        if (not isinstance(ecc, dict) or ecc.get("livello") not in LIV
+        if (not isinstance(ecc, dict) or not isinstance(ecc.get("livello"), str) or ecc["livello"] not in LIV
                 or not isinstance(ecc.get("compiti"), str) or not ecc["compiti"].strip()):
             raise MappaNonValida("seniority.json: `fallback_eccezione` richiede `livello` (un livello della mappa) e `compiti` (testo)")
         ids = [l["id"] for l in SEN["livelli"]]
