@@ -205,13 +205,16 @@ class FallbackTests(unittest.TestCase):
     def tearDown(self):
         self.sb.close()
 
-    def generate(self, **fields):
+    def run_generator(self, **fields):
         m = json.loads(read(self.map))
         for k in ("fallback_indicativo", "fallback_eccezione"): m.pop(k, None)
         m.update(fields)
         write(self.map, json.dumps(m, ensure_ascii=False))
-        r = subprocess.run([sys.executable, os.path.join(self.sb.reg, "_strumenti", "attiva_profilo.py"),
-                            "--scrivi-catalogo", self.dst], capture_output=True, text=True)
+        return subprocess.run([sys.executable, os.path.join(self.sb.reg, "_strumenti", "attiva_profilo.py"),
+                               "--scrivi-catalogo", self.dst], capture_output=True, text=True)
+
+    def generate(self, **fields):
+        r = self.run_generator(**fields)
         self.assertEqual(r.returncode, 0, r.stderr)
         sec = read(os.path.join(self.dst, "PROFILO.md")).split("<!-- catalogo:inizio -->")[1]
         self.assertEqual(self.sb.run([self.dst])[0], 0)
@@ -227,9 +230,32 @@ class FallbackTests(unittest.TestCase):
         sec = self.generate(fallback="SD3", fallback_indicativo=True,
                             fallback_eccezione={"livello": "SD4", "compiti": "architettura, sicurezza"})
         self.assertIn("al livello di ripiego fissato nel mandato (valore indicativo **SD3**); i task fuori catalogo "
-                      "che per natura sono di livello Lead (architettura, sicurezza) partono da **SD4**. ", sec)
-        self.assertIn("| SD3 Senior (ripiego indicativo, lo fissa il mandato) |", sec)
+                      "che per natura sono di livello Lead (architettura, sicurezza) partono da **SD4**, "
+                      "valore indicativo anch'esso. ", sec)
+        self.assertIn("| — | Task fuori catalogo, salvo l'eccezione della riga seguente | — | "
+                      "SD3 Senior (ripiego indicativo, lo fissa il mandato) | `sonnet` · `high` |", sec)
+        self.assertIn("| — | Task fuori catalogo che per natura è di livello Lead: architettura, sicurezza | — | "
+                      "SD4 Lead (ripiego indicativo, eccezione) | `opus` · `high` |", sec)
+        self.assertNotIn("Qualsiasi task fuori catalogo", sec)
+
+    def test_fixed_fallback_with_exception(self):
+        sec = self.generate(fallback="SD3", fallback_eccezione={"livello": "SD4", "compiti": "sicurezza"})
+        self.assertIn("Un task fuori catalogo si esegue a **SD3**; i task fuori catalogo che per natura sono di "
+                      "livello Lead (sicurezza) partono da **SD4**. Configurazioni", sec)
+        self.assertIn("| SD3 Senior (ripiego) |", sec)
         self.assertIn("| SD4 Lead (ripiego, eccezione) |", sec)
+
+    def test_malformed_map_is_refused_with_a_message(self):
+        before = read(os.path.join(self.dst, "PROFILO.md"))
+        for bad in ({"fallback_eccezione": {"livello": "SD4"}},
+                    {"fallback_eccezione": {"livello": "SD9", "compiti": "x"}},
+                    {"fallback_eccezione": {"livello": "SD2", "compiti": "x"}},
+                    {"fallback_eccezione": "SD4"},
+                    {"fallback_indicativo": "si"}):
+            r = self.run_generator(fallback="SD3", **bad)
+            self.assertNotEqual(r.returncode, 0, bad)
+            self.assertIn("seniority.json:", r.stderr, bad)
+            self.assertEqual(read(os.path.join(self.dst, "PROFILO.md")), before, bad)
 
     def test_indicative_fallback_without_exception(self):
         sec = self.generate(fallback="SD3", fallback_indicativo=True)

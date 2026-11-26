@@ -12,7 +12,8 @@ Senza --out stampa il contenuto. La mappa livello -> configurazione è _seniorit
 Ripiego dei task fuori catalogo. Il campo `fallback` della mappa è il livello di ripiego. Se la mappa dichiara
 anche `fallback_indicativo: true`, il livello è un valore indicativo e lo fissa il mandato del progetto; se
 dichiara `fallback_eccezione` ({"livello": "SDn", "compiti": "..."}), i task fuori catalogo di quel tipo partono
-dal livello dell'eccezione. Senza questi due campi il testo generato è quello delle versioni precedenti."""
+dal livello dell'eccezione, che è indicativo anch'esso quando lo è il ripiego. Il livello dell'eccezione deve
+essere più alto del ripiego. Senza questi due campi il testo generato è quello delle versioni precedenti."""
 import json, os, re, sys
 
 __version__ = "0.3.0"
@@ -23,6 +24,9 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SEN = json.load(open(os.path.join(BASE, "_seniority", "seniority.json"), encoding="utf-8"))
 LIV = {l["id"]: l for l in SEN["livelli"]}
 START, END = "<!-- catalogo:inizio -->", "<!-- catalogo:fine -->"
+
+class MappaNonValida(ValueError):
+    """La mappa della Seniority Digitale ha un campo di ripiego non valido."""
 
 def cfg(lv):
     l = LIV[lv]
@@ -40,7 +44,16 @@ def tabella(p):
         c = cfg(t["seniority"])
         righe.append(f"| {cell(t['id'])} | {cell(t['task'])} | {cell(t.get('deliverable'))} | {t['seniority']} {LIV[t['seniority']]['nome']} | {c[0]} | {c[1]} | {c[2]} |")
     fb = SEN["fallback"]; c = cfg(fb)
-    ind, ecc = SEN.get("fallback_indicativo") is True, SEN.get("fallback_eccezione")
+    ind, ecc = SEN.get("fallback_indicativo"), SEN.get("fallback_eccezione")
+    if ind not in (None, True, False):
+        raise MappaNonValida("seniority.json: `fallback_indicativo` deve essere true o false")
+    ind = ind is True
+    if ecc is not None:
+        if not isinstance(ecc, dict) or ecc.get("livello") not in LIV or not str(ecc.get("compiti") or "").strip():
+            raise MappaNonValida("seniority.json: `fallback_eccezione` richiede `livello` (un livello della mappa) e `compiti` (testo)")
+        ids = [l["id"] for l in SEN["livelli"]]
+        if ids.index(ecc["livello"]) <= ids.index(fb):
+            raise MappaNonValida("seniority.json: il livello di `fallback_eccezione` deve essere più alto di `fallback`")
     if not ind and not ecc:  # mappa senza i campi nuovi: testo delle versioni precedenti
         righe.append(f"| — | Qualsiasi task fuori catalogo | — | {fb} {LIV[fb]['nome']} (ripiego) | {c[0]} | {c[1]} | {c[2]} |")
         frase = f"Un task fuori catalogo si esegue a **{fb}**. "
@@ -51,8 +64,10 @@ def tabella(p):
         if ecc:
             fe = ecc["livello"]; ce = cfg(fe); comp = cell(ecc["compiti"])
             righe.append(f"| — | Task fuori catalogo, salvo l'eccezione della riga seguente | — | {fb} {LIV[fb]['nome']} ({nota}) | {c[0]} | {c[1]} | {c[2]} |")
-            righe.append(f"| — | Task fuori catalogo che per natura è di livello {LIV[fe]['nome']}: {comp} | — | {fe} {LIV[fe]['nome']} (ripiego, eccezione) | {ce[0]} | {ce[1]} | {ce[2]} |")
-            frase += f"; i task fuori catalogo che per natura sono di livello {LIV[fe]['nome']} ({comp}) partono da **{fe}**"
+            nota_e = "ripiego indicativo, eccezione" if ind else "ripiego, eccezione"
+            righe.append(f"| — | Task fuori catalogo che per natura è di livello {LIV[fe]['nome']}: {comp} | — | {fe} {LIV[fe]['nome']} ({nota_e}) | {ce[0]} | {ce[1]} | {ce[2]} |")
+            frase += (f"; i task fuori catalogo che per natura sono di livello {LIV[fe]['nome']} ({comp}) partono da **{fe}**"
+                      + (", valore indicativo anch'esso" if ind else ""))
         else:
             righe.append(f"| — | Qualsiasi task fuori catalogo | — | {fb} {LIV[fb]['nome']} ({nota}) | {c[0]} | {c[1]} | {c[2]} |")
         frase += ". "
@@ -99,7 +114,9 @@ def attiva(d, lv, strumento):
 def main(a):
     if a and a[0] == "--scrivi-catalogo":
         for d in a[1:]:
-            scrivi_catalogo(d); print("catalogo scritto:", d)
+            try: scrivi_catalogo(d)
+            except MappaNonValida as ex: sys.exit(str(ex))
+            print("catalogo scritto:", d)
         return
     if len(a) < 4 or a[2] != "--strumento" or a[1] not in LIV:
         sys.exit(__doc__)

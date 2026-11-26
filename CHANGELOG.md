@@ -20,6 +20,17 @@ after Guide 1.0.0-rc.3 (RFC 0003, item 10; decision D4 of the Human Manager on t
 bump: MINOR, the generator reads two new optional fields of the Digital Seniority map; nothing changes for a
 map without them.
 
+With a map that has neither field, the generated text is byte for byte the one of 0.2.3, so role-profiles
+v0.4.1 and the unpublished registry candidates 0.5.0 and 0.5.1 validate as before. The registry tests still
+pin role-profiles v0.4.1 and its 47-profile baseline; they follow the next registry release in a later PATCH.
+`valida_profilo.py` and `release_diff.py` change only their version number.
+
+Known limit: the generated catalogue states the fallback level and its exception only. The other rules of
+the Guide §7.1 on tasks outside the catalogue are not in the generated text: the AI Coordinator records the
+task, proposes adding it to the catalogue and reports the share of such tasks in the cycle review
+("Fallback"), and raises the level at the first failure for lack of capability ("Promotion and reduction").
+They are in the AI Coordinator profile and in the explanation of the map.
+
 ### Added
 
 - `attiva_profilo.py`, generated catalogue (section 10 of `PROFILO.md`): two optional fields of
@@ -28,22 +39,15 @@ map without them.
     sets. The sentence and the row of the table say so.
   - `fallback_eccezione: {"livello": "SDn", "compiti": "..."}`: tasks outside the catalogue of the named kinds
     start at the level of the exception. The table gains a second fallback row and the sentence names the
-    exception.
-- Tests: three cases on the generated catalogue (map without the new fields, indicative fallback with the
-  exception, indicative fallback alone). 31 tests.
-
-### Unchanged
-
-- With a map that has neither field, the generated text is byte for byte the one of 0.2.3, so the registry
-  releases up to role-profiles 0.5.1 validate as before. The registry tests still pin role-profiles v0.4.1
-  and its 47-profile baseline; they follow the next registry release in a later PATCH.
-- `valida_profilo.py` and `release_diff.py` change only their version number.
-
-### Known limits
-
-- The generated sentence does not say that a task outside the catalogue is promoted at the first failure for
-  lack of capability (Guide §7.1, "Promotion and reduction"): that rule is in the AI Coordinator profile and
-  in the explanation of the map, not in the generated catalogue.
+    exception. When the fallback is indicative, the exception is marked as indicative too (RFC 0003, item 10:
+    value and exception are both Guidance).
+  - A map with an invalid value is refused with a message that names the field, and no profile is written:
+    `fallback_indicativo` that is not true or false; `fallback_eccezione` without `livello` or `compiti`, with
+    a level that is not in the map, or with a level not higher than `fallback`. The validator then reports
+    that section 10 cannot be compared.
+- `README.md`: the two fields are documented.
+- Tests: five cases on the generated catalogue (map without the new fields; indicative fallback with the
+  exception; indicative fallback alone; fixed fallback with the exception; invalid maps refused). 33 tests.
 
 ## [0.2.3] - 2026-11-26
 

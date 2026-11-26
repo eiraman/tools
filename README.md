@@ -21,6 +21,12 @@ python3 _strumenti/attiva_profilo.py --scrivi-catalogo <profile-folder>
 python3 _strumenti/attiva_profilo.py <profile-folder> SD3 --strumento claude --out <folder>
 ```
 
+The generated catalogue ends with the fallback for tasks outside the catalogue, read from
+`_seniority/seniority.json`: `fallback` is the level; the optional `fallback_indicativo: true` says that the
+level is an indicative value the mandate of the project sets; the optional
+`fallback_eccezione: {"livello": "SDn", "compiti": "..."}` names the tasks that start at a higher level.
+Without the two optional fields the text is the one of the versions before 0.3.0.
+
 Accepted statuses: `draft`, `qualified`, `maintained`, `suspended`, and the Italian `bozza non qualificata`, `qualificato`. The status is read only from the profile's status line (`Stato: …` or `Status: …`) and from the `stato` field of `profilo.json`. Section names are in Italian.
 
 ## Release diff
