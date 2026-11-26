@@ -13,6 +13,17 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-26
+
+### Changed
+
+- The registry tests follow role-profiles 0.3.0: `tests/baseline_registro.txt` lists the 43 standard
+  profiles of that release, the 41 of 0.2.0 plus `governo/revisore-privacy` and
+  `governo/revisore-sicurezza`, and the test expects 43. The templates in `_modello/` stay outside the
+  baseline.
+- CI: `PROFILES_REF` in `tests.yml` pins role-profiles v0.3.0
+  (`adeedb4c940c637f93d46a9b58d22839e6dfee7a`).
+
 ## [0.2.1] - 2026-11-26
 
 ### Changed
@@ -60,7 +71,8 @@ launch of 25 November 2026. It was not tagged; the version number was assigned a
 - Licence: Apache-2.0. Earlier copies of the scripts, distributed in the eiraman.tech kit under MIT, keep
   that licence.
 
-[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.1...main
+[Unreleased]: https://github.com/eiraman/tools/compare/v0.2.2...main
+[0.2.2]: https://github.com/eiraman/tools/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/eiraman/tools/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/eiraman/tools/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/eiraman/tools/releases/tag/v0.1.0
