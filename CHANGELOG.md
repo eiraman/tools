@@ -13,6 +13,39 @@ repository share one version, exposed as `__version__` and by `--version`.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-27
+
+Scope: Change Request CR-030 of the method project (work package WP-30E), "latest version everywhere".
+Written against: The Eiraman Guide 1.0.0-rc.6. Depends on: role-profiles 0.11.0 (a local candidate, not yet
+tagged). Version bump: MINOR (VERSIONING 2.3): the validator adds a check, a compatible addition to the
+public interface (a new reason to refuse a profile); no argument, exit code or output format changes.
+
+**Compatible with registries >= 0.11.0 only:** profiles whose `metodo` does not cite the Guide with a version (all registries before 0.11.0) are now rejected.
+
+### Added
+
+- `valida_profilo.py`: the `metodo` field of `profilo.json` must cite the Guide with a version, in the form
+  `The Eiraman Guide X.Y.Z[-rc.N]`, optionally followed by `; ` and the sections (the rule of VERSIONING §5).
+  A value that cites the specification 0.3 or any other source, or has no version, is refused with a
+  message. A trailing newline and a `; ` followed only by spaces are refused too. Tests cover accepted and refused values; the registry candidate 0.11.0 passes (49 of 49).
+- Test: a `CHANGELOG.md` inside a profile folder (present in every folder since role-profiles 0.11.0) does
+  not change the result of either tool; the tools read only `PROFILO.md`, `profilo.json` and the family's
+  `FAMIGLIA.md`, never scan the folder.
+
+### Changed
+
+- The registry tests follow role-profiles 0.11.0: `tests/baseline_registro.txt` lists the 49 standard
+  profiles (the 48 of 0.6.0 plus `governo/security-officer`) and the test expects 49. The baseline is the
+  output of `valida_profilo.py` on those folders from the registry root, as CI does.
+- CI: `PROFILES_REF` in `tests.yml` pins role-profiles 0.11.0
+  (`717ab65b155c6275d49e1ae7365a8cbcea131380`, a candidate that must be replaced by the published commit
+  before release). **Order of publication:** role-profiles 0.11.0 must be published before this release;
+  its `TOOLS_REF` then moves to tools 0.4.0 in a later registry release.
+- `attiva_profilo.py`: the message for SD5 without `--motivo` refers to the Guide (§7, Digital Seniority)
+  instead of the specification 0.3 (§4 bis). Wording only.
+- `README.md`: 49 standard profiles; the `release_diff.py` examples use `v1.0.0-rc.5` and `HEAD` (rc.6 is
+  not yet tagged).
+
 ## [0.3.2] - 2026-11-26
 
 Scope: Change Request CR-010 of the method project. Corrections from the independent re-review of 0.3.0 and

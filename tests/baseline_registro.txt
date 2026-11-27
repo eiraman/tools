@@ -34,6 +34,7 @@ OK   ./governo/revisore-legale-compliance
 OK   ./governo/revisore-privacy
 OK   ./governo/revisore-sicurezza
 OK   ./governo/revisore-test-qualita
+OK   ./governo/security-officer
 OK   ./sviluppo/dotnet-developer
 OK   ./sviluppo/go-developer
 OK   ./sviluppo/java-developer

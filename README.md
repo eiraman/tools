@@ -33,8 +33,8 @@ Accepted statuses: `draft`, `qualified`, `maintained`, `suspended`, and the Ital
 
 ```sh
 python3 release_diff.py <repo> <old-ref> <new-ref> [--json] [--max-lines N]
-python3 release_diff.py ../guide v1.0.0-rc.1 HEAD          # text report
-python3 release_diff.py ../guide v1.0.0-rc.1 HEAD --json   # the same report as JSON
+python3 release_diff.py ../guide v1.0.0-rc.5 HEAD          # text report (rc.6 not yet tagged: HEAD)
+python3 release_diff.py ../guide v1.0.0-rc.5 HEAD --json   # the same report as JSON
 ```
 
 `release_diff.py` does not need the registry layout: it reads any Git repository. Between `<old-ref>` (the
@@ -71,7 +71,7 @@ If none exists, only the generic patterns apply.
 cd tests && python3 -m unittest -v
 ```
 
-`test_release_diff.py` builds throwaway Git repositories and needs `git`; `test_versions.py` checks that the tools share one version, equal to the latest release in `CHANGELOG.md`. The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 48 standard profiles of the pinned registry.
+`test_release_diff.py` builds throwaway Git repositories and needs `git`; `test_versions.py` checks that the tools share one version, equal to the latest release in `CHANGELOG.md`. The registry tests need the Role Profile registry: by default a checkout of the `role-profiles` repository next to this one (`../role-profiles`); set `EIRAMAN_REGISTRY` to use another path. Without a registry they are skipped. `tests/baseline_registro.txt` holds the expected output for the 49 standard profiles of the pinned registry.
 
 ## Licence
 

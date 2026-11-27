@@ -16,7 +16,7 @@ dal livello dell'eccezione, che è indicativo anch'esso quando lo è il ripiego.
 essere più alto del ripiego. Senza questi due campi il testo generato è quello delle versioni precedenti."""
 import json, os, re, sys
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 if __name__ == "__main__" and sys.argv[1:] == ["--version"]:  # before the Seniority map is read
     print(f"attiva_profilo.py {__version__}"); sys.exit(0)
 
@@ -125,7 +125,7 @@ def main(a):
     if len(a) < 4 or a[2] != "--strumento" or a[1] not in LIV:
         sys.exit(__doc__)
     if a[1] == "SD5" and "--motivo" not in a:
-        sys.exit("SD5 si usa per eccezione: indica --motivo \"...\" e registralo nel registro del progetto (spec §4 bis).")
+        sys.exit("SD5 si usa per eccezione: indica --motivo \"...\" e registralo nel registro del progetto (Guida §7, Seniority Digitale).")
     p_ = json.load(open(os.path.join(a[0], "profilo.json"), encoding="utf-8"))
     if a[1] not in [u.get("livello") for u in p_.get("unit_cost", [])]:
         print(f"Attenzione: il profilo non ha uno Unit Cost per {a[1]}; registra il costo come «sconosciuto».", file=sys.stderr)

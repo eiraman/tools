@@ -9,7 +9,7 @@ corrente, risalendo dalla cartella dello strumento fino alla radice del reposito
 dalla variabile EIRAMAN_DENY_FILE. Se manca, restano attivi i soli pattern generici."""
 import json, os, re, sys
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 SEZIONI = ["Identità e scopo", "Competenze di base e metodologie", "Responsabilità", "Azioni consentite",
            "Azioni vietate", "Regole di comunicazione", "Repository documentale", "Limiti dichiarati",
@@ -17,6 +17,8 @@ SEZIONI = ["Identità e scopo", "Competenze di base e metodologie", "Responsabil
 CAMPI = ["id", "nome", "versione", "metodo", "stato", "piramide", "fasi", "descrizione_breve", "competenze_fonti",
          "motori", "ragionamento", "seniority", "catalogo", "mode_role", "unit_cost", "strumenti_deterministici",
          "scritture_consentite", "do_riservati", "qualificazione"]
+# `metodo` cita la Guida Eiraman con la versione: «The Eiraman Guide X.Y.Z[-rc.N][; sezioni]» (VERSIONING §5).
+METODO = re.compile(r"^The Eiraman Guide \d+\.\d+\.\d+(-rc\.\d+)?(; \S.*)?$")
 STATI_IT = ["bozza non qualificata", "qualificato"]
 STATI_EN = ["draft", "qualified", "maintained", "suspended"]
 STATI = STATI_IT + STATI_EN
@@ -84,6 +86,8 @@ def check(d):
         return err + [f"profilo.json non valido: {ex}"]
     for c in CAMPI:
         if c not in p or p[c] in (None, "", [], {}): err.append(f"profilo.json: campo «{c}» mancante o vuoto")
+    if p.get("metodo") and not (isinstance(p["metodo"], str) and METODO.fullmatch(p["metodo"])):
+        err.append(f"profilo.json: «metodo» deve citare la Guida (The Eiraman Guide X.Y.Z[-rc.N][; sezioni]), non «{str(p['metodo'])[:60]}»")
     if p.get("stato") and str(p["stato"]).strip().lower() not in STATI:
         err.append(f"profilo.json: stato «{p.get('stato')}» non ammesso")
     if p.get("id") and p["id"] != os.path.basename(os.path.normpath(d)).lower():

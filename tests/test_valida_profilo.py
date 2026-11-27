@@ -86,6 +86,17 @@ class UnitTests(unittest.TestCase):
         self.assertTrue(self.v.stato_presente("Versione 0.1.0 · Stato: **bozza non qualificata**"))
         self.assertTrue(self.v.stato_presente("Status: **maintained**"))
 
+    def test_metodo_cites_the_guide_with_a_version(self):
+        ok = ("The Eiraman Guide 1.0.0", "The Eiraman Guide 1.0.0-rc.6",
+              "The Eiraman Guide 1.0.0-rc.6; §3 e §7 (regole), §7.1 «Fallback»")
+        no = ("Eiraman 0.3", "Specifica Eiraman 0.3; §4", "The Eiraman Guide", "The Eiraman Guide 1.0",
+              "The Eiraman Guide rc.6", "The Eiraman Guide 1.0.0-beta.1", "The Eiraman Guide 1.0.0;",
+              "the eiraman guide 1.0.0", "The Eiraman Guide 1.0.0\n", "The Eiraman Guide 1.0.0; ", "The Eiraman Guide 1.0.0;   ", "Specifica Eiraman 0.3 (The Eiraman Guide 1.0.0-rc.6)", "")
+        for m in ok:
+            self.assertTrue(self.v.METODO.fullmatch(m), m)
+        for m in no:
+            self.assertFalse(self.v.METODO.fullmatch(m), m)
+
     def test_deny_file_comments_and_blanks_ignored(self):
         with tempfile.NamedTemporaryFile("w", suffix=".local", delete=False, encoding="utf-8") as f:
             f.write("# comment\n\n\\bAlpha\\b\n  # indented comment\nBeta\n")
@@ -110,7 +121,7 @@ class RegistryTests(unittest.TestCase):
 
     def test_all_profiles_match_baseline(self):
         dirs = baseline_dirs()
-        self.assertEqual(len(dirs), 48)
+        self.assertEqual(len(dirs), 49)
         code, out = self.sb.run(dirs, deny_file=os.environ.get("EIRAMAN_DENY_FILE"), cwd=REGISTRY)
         self.assertEqual(code, 0, out)
         self.assertEqual(out, read(BASELINE))
@@ -172,6 +183,38 @@ class RegistryTests(unittest.TestCase):
         code, out = self.sb.run([d])
         self.assertEqual(code, 1, out)
         self.assertIn("stato mancante", out)
+
+    def test_metodo_citing_the_old_specification_rejected(self):
+        for val in ("Eiraman 0.3", "Specifica Eiraman 0.3; §4 bis", "The Eiraman Guide"):
+            with self.subTest(metodo=val):
+                d = self.sb.copy_profile(self.prof)
+                js = os.path.join(d, "profilo.json")
+                p = json.loads(read(js)); p["metodo"] = val
+                write(js, json.dumps(p, ensure_ascii=False, indent=2))
+                code, out = self.sb.run([d])
+                self.assertEqual(code, 1, out)
+                self.assertIn("«metodo» deve citare la Guida", out)
+                shutil.rmtree(d)
+
+    def test_metodo_with_guide_version_and_sections_accepted(self):
+        d = self.sb.copy_profile(self.prof)
+        js = os.path.join(d, "profilo.json")
+        p = json.loads(read(js)); p["metodo"] = "The Eiraman Guide 1.0.0; §7.1 «Fallback»"
+        write(js, json.dumps(p, ensure_ascii=False, indent=2))
+        code, out = self.sb.run([d])
+        self.assertEqual(code, 0, out)
+
+    def test_profile_changelog_file_is_ignored(self):
+        # Since role-profiles 0.11.0 every profile folder carries a CHANGELOG.md: neither tool reads it.
+        d = self.sb.copy_profile(self.prof)
+        self.assertTrue(os.path.isfile(os.path.join(d, "CHANGELOG.md")))
+        write(os.path.join(d, "CHANGELOG.md"), "# Changelog\n\nPassword = unlikelysecret99 /Users/x\n")
+        code, out = self.sb.run([d])
+        self.assertEqual(code, 0, out)
+        r = subprocess.run([sys.executable, os.path.join(self.sb.reg, "_strumenti", "attiva_profilo.py"),
+                            d, "SD3", "--strumento", "claude"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertNotIn("unlikelysecret99", r.stdout)
 
     def test_invalid_json_state_rejected(self):
         d = self.sb.copy_profile(self.prof)
